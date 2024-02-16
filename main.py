@@ -12,8 +12,8 @@ ACC_SID = os.environ.get('ACCOUNT_SID')
 AUTH_KEY = os.environ.get('AUTHENTICATION_KEY')
 MY_MOBILE = os.environ.get('MY_MOB_NO')
 TODAY = date.today()
-YESTERDAY = (TODAY - timedelta(days=2)).strftime("%Y-%m-%d")
-ERE_YESTERDAY = (TODAY - timedelta(days=3)).strftime("%Y-%m-%d")
+YESTERDAY = (TODAY - timedelta(days=1)).strftime("%Y-%m-%d")
+ERE_YESTERDAY = (TODAY - timedelta(days=2)).strftime("%Y-%m-%d")
 STOCK_KEY = os.environ.get('SE_API_KEY')
 NEWS_API_KEY = os.environ.get('NEWS_KEY')
 NEWS_ARTICLES = []
@@ -55,9 +55,9 @@ if dif > 0:
     DIRECTION = "🔺"
 else:
     DIRECTION = "🔻"
-change = round(dif / ere_yesterday_closing * 100, 2)
+change = abs(round(dif / ere_yesterday_closing * 100, 2))
 get_news = False
-if change <= -5.0 or change >= 5.0:
+if change >= 5.0:
     get_news = True
 print(change)
 
@@ -65,23 +65,13 @@ print(change)
 # Instead of printing ("Get News"), actually get the first 3 news pieces for the COMPANY_NAME.
 if get_news:
     news_response = rq.get(url=NEWS_ENDP, params=news_param)
-    news_data = news_response.json()
-    num_articles = news_data['totalResults']
-    NEWS_ARTICLES = [x for x in news_data['articles']]
-
-try:
-    for i in range(0,3):
-        stocks_change = f"{DIRECTION}{change}+%"
-        headline = NEWS_ARTICLES[i]['title']
-        brief = NEWS_ARTICLES[i]['description']
-        CURRATED_NEWS.append(f"{STOCK}:{stocks_change}\n Headline:{headline}\n Brief:{brief}")
-
-except IndexError:
-    pass
+    news_data = news_response.json()['articles']
+    TOP_NEWS = news_data[:3]
+    formatted_news = [f"{STOCK}:{DIRECTION}{change}+%\n Headline:{news['title']}\n Brief:{news['description']}" for news in TOP_NEWS ]
 
 
 if get_news:
-   send_msg(CURRATED_NEWS)
+   send_msg(formatted_news)
 
 
 ## STEP 3: Use https://www.twilio.com

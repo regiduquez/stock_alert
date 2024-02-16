@@ -2,14 +2,14 @@ import http.client
 import json
 def send_msg(news_list):
     try:
-        for i in range(0, 3):
+        for news in news_list:
             conn = http.client.HTTPSConnection("ggqn8w.api.infobip.com")
             payload = json.dumps({
                 "messages": [
                     {
                         "destinations": [{"to":"639467624022"}],
                         "from": "ServiceSMS",
-                        "text": news_list[i]
+                        "text": news
                     }
                 ]
             })
